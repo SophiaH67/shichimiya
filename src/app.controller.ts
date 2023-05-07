@@ -42,4 +42,12 @@ export class AppController {
   exceptionTest(): void {
     throw new Error('Exception test');
   }
+
+  @MessagePattern('saya')
+  saya(@Ctx() context: ShichimiyaContext): string {
+    const amount = parseInt(context.args[0], 10);
+    if (isNaN(amount)) throw new Error('Invalid amount');
+
+    return 'a'.repeat(amount);
+  }
 }
