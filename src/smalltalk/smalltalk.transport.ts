@@ -79,16 +79,14 @@ export class SmallTalkServer extends Server implements CustomTransportStrategy {
         await new Promise((resolve) =>
           reply.subscribe({
             next: (value) => conversation.write(value),
-            complete: () => {
-              conversation.write('Done!', true).then(resolve);
-            },
+            complete: () => conversation.completeWrite().then(resolve),
           }),
         );
         continue;
       }
 
       if (typeof reply === 'string') {
-        await conversation.write(reply, true);
+        await conversation.completeWrite(reply);
         continue;
       }
 

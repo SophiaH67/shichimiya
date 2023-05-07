@@ -32,37 +32,43 @@ export class Conversation {
     );
   }
 
-  public async write(answer: string, endConversation = false) {
-    // Split messages into chunks of x characters or less, where x is the max
-    // length of the specified frontend
-    const chunks = [];
-    let chunk = '';
-    for (const char of answer) {
-      if (
-        chunk.length + char.length >
-        this.currentFrontend.maxMessageLength - '\n\nalso'.length
-      ) {
-        chunks.push(chunk);
-        chunk = '';
-      }
-      chunk += char;
-    }
-    if (chunk.length) chunks.push(chunk);
-
-    for (let i = 0; i < chunks.length; i++) {
-      const lastChunk = i === chunks.length - 1;
-      await this.writeRaw(chunks[i], endConversation && lastChunk);
-    }
+  /**
+   * This method is to be called when data it received from a directive.
+   * The data given will be chunked and sent instantly. This will also
+   * append a `wait` directive at the end, to signal that more data is
+   * coming. If you know that this will be the last data to be sent, use
+   * `completeWrite` instead.
+   */
+  public async write(value: string) {
+    await this.sendChunkedMessage(value + '\n\nWait...');
   }
 
-  public async writeRaw(chunk: string, endConversation = false) {
-    const replyMessage = this.messages[this.messages.length - 1];
+  /**
+   * This method is triggered when a directive is done executing.
+   * Last value can be specified, if not specified, will reply
+   * with literal `Done`.
+   */
+  public async completeWrite(value?: string) {
+    if (value) await this.sendChunkedMessage(value);
+    else await this.sendChunkedMessage('Done!');
+  }
 
-    const msg = await replyMessage.reply(
-      chunk + (!endConversation ? '\n\nalso' : ''),
-    );
-    this.messages.push(msg);
+  private async sendChunkedMessage(message: string) {
+    const maxChunkLength = this.currentFrontend.maxMessageLength - 8; // Leave some room for the "Also" directive
+    let messageReference = this.messages[this.messages.length - 1];
 
-    return msg;
+    for (let i = 0; i < message.length; i += maxChunkLength) {
+      const isLastChunk = i + maxChunkLength >= message.length;
+
+      let chunk = message.slice(
+        i,
+        isLastChunk ? message.length : i + maxChunkLength,
+      );
+
+      if (!isLastChunk) chunk += '\n\nAlso';
+
+      messageReference = await messageReference.reply(chunk);
+      this.messages.push(messageReference);
+    }
   }
 }
