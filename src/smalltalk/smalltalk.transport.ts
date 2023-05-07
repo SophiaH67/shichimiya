@@ -92,7 +92,7 @@ export class SmallTalkServer extends Server implements CustomTransportStrategy {
         continue;
       }
 
-      console.debug(`Invalid reply "${reply}"`);
+      console.debug('Invalid reply', reply);
     }
   }
 
