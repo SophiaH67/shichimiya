@@ -28,9 +28,10 @@ export class AppController {
     return new Observable((subscriber) => {
       (async () => {
         for (let i = 0; i < 5; i++) {
-          await sleep(1000);
           subscriber.next(`Pong ${i + 1}`);
+          await sleep(1000);
         }
+        subscriber.complete();
       })();
     });
   }
