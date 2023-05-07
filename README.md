@@ -1,5 +1,7 @@
 # Shichimiya
 
+![Shichimiya being cute💕](https://i.ytimg.com/vi/6gEp5nJn6nk/maxresdefault.jpg)
+
 This is an implementation of [the smalltalk protocol](https://gist.github.com/fredi-68/81a157d30059b543132e328aed91f64d)
 in NestJS with a custom microservice transporter.
 
