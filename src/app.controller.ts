@@ -1,13 +1,15 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseFilters } from '@nestjs/common';
 import { Ctx, MessagePattern } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { AppService } from './app.service';
+import { SmallTalkExceptionFilter } from './smalltalk/smalltalk-exception.filter';
 import { ShichimiyaContext } from './smalltalk/types/ShichimiyaContext';
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+@UseFilters(SmallTalkExceptionFilter)
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -34,5 +36,10 @@ export class AppController {
         subscriber.complete();
       })();
     });
+  }
+
+  @MessagePattern('exception-test')
+  exceptionTest(): void {
+    throw new Error('Exception test');
   }
 }
