@@ -32,7 +32,7 @@ export class Conversation {
     );
   }
 
-  public async write(answer: string, lastChunk = false) {
+  public async write(answer: string, endConversation = false) {
     // Split messages into chunks of x characters or less, where x is the max
     // length of the specified frontend
     const chunks = [];
@@ -50,15 +50,17 @@ export class Conversation {
     if (chunk.length) chunks.push(chunk);
 
     for (let i = 0; i < chunks.length; i++) {
-      const lastChunkChunk = i === chunks.length - 1;
-      await this.writeRaw(chunks[i], lastChunkChunk && lastChunk);
+      const lastChunk = i === chunks.length - 1;
+      await this.writeRaw(chunks[i], endConversation && lastChunk);
     }
   }
 
-  public async writeRaw(chunk: string, last = false) {
+  public async writeRaw(chunk: string, endConversation = false) {
     const replyMessage = this.messages[this.messages.length - 1];
 
-    const msg = await replyMessage.reply(chunk + (!last ? '\n\nalso' : ''));
+    const msg = await replyMessage.reply(
+      chunk + (!endConversation ? '\n\nalso' : ''),
+    );
     return msg;
   }
 }
