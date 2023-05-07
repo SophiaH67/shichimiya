@@ -48,17 +48,14 @@ export class SmallTalkServer extends Server implements CustomTransportStrategy {
       const [command, ...args] = parse(directive);
       // For now, only accept strings
       if (
-        args.some(
-          (arg) => typeof arg !== 'string' || typeof command !== 'string',
-        )
+        args.some((arg) => typeof arg !== 'string') ||
+        typeof command !== 'string'
       ) {
         console.debug(`Invalid directive "${directive}"`);
         continue;
       }
 
-      const handler = this.messageHandlers.get(
-        (command as string).toLowerCase(),
-      );
+      const handler = this.messageHandlers.get(command.toLowerCase());
 
       if (!handler) {
         console.debug(`No handler found for directive "${directive}"`);
