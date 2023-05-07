@@ -75,21 +75,27 @@ export class SmallTalkServer extends Server implements CustomTransportStrategy {
 
       const reply = await handler(message, context);
 
+      if (!reply) continue;
+
       // If it's an observable, subscribe and pipe to the write() method
-      if (reply instanceof Observable)
+      if (reply instanceof Observable) {
         await new Promise((resolve) =>
           reply.subscribe({
             next: (value) => conversation.write(value),
             complete: () => {
-              conversation.write('Done!');
-              resolve(undefined);
+              conversation.write('Done!', true).then(resolve);
             },
           }),
         );
+        continue;
+      }
 
-      if (!reply) continue;
+      if (typeof reply === 'string') {
+        await conversation.write(reply, true);
+        continue;
+      }
 
-      await message.reply(reply);
+      console.debug(`Invalid reply "${reply}"`);
     }
   }
 
