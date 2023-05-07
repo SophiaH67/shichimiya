@@ -61,6 +61,8 @@ export class Conversation {
     const msg = await replyMessage.reply(
       chunk + (!endConversation ? '\n\nalso' : ''),
     );
+    this.messages.push(msg);
+
     return msg;
   }
 }
