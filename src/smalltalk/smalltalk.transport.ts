@@ -1,4 +1,5 @@
 import { CustomTransportStrategy, Server } from '@nestjs/microservices';
+import { Observable } from 'rxjs';
 import { parse } from 'shell-quote';
 import { DiscordFrontend } from './frontend/DiscordFrontend';
 import { Conversation } from './types/Conversation';
@@ -74,6 +75,18 @@ export class SmallTalkServer extends Server implements CustomTransportStrategy {
 
       const reply = await handler(message, context);
 
+      // If it's an observable, subscribe and pipe to the write() method
+      if (reply instanceof Observable)
+        await new Promise((resolve) =>
+          reply.subscribe({
+            next: (value) => conversation.write(value),
+            complete: () => {
+              conversation.write('Done!');
+              resolve(undefined);
+            },
+          }),
+        );
+
       if (!reply) continue;
 
       await message.reply(reply);
@@ -87,7 +100,7 @@ export class SmallTalkServer extends Server implements CustomTransportStrategy {
     );
 
     if (!conversation) {
-      conversation = new Conversation();
+      conversation = new Conversation(message.frontend);
       this.conversations.push(conversation);
     }
 
