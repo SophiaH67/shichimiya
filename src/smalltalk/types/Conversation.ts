@@ -6,6 +6,10 @@ export class Conversation {
   public inflightDirectives: string[] = []; // Gets reset when all directives are done executing
   public currentFrontend: ShichimiyaFrontend;
 
+  constructor(frontend: ShichimiyaFrontend) {
+    this.currentFrontend = frontend;
+  }
+
   public addMessage(message: ShichimiyaMessage) {
     if (this.isWaitingForReply()) this.inflightDirectives.pop(); // Remove 'Also' directive
 
